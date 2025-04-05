@@ -1,0 +1,17 @@
+---
+title: "Ting-Yu(Sophia) Wang"
+image: "/images/resume photo.jpg"
+about:
+  template: jolla
+  links:
+    - icon: envelope
+      href: mailto:sophia880221@gmail.com
+    - icon: linkedin
+      href: https://www.linkedin.com/in/sophiawm/
+    - icon: github
+      href: https://github.com/sophia0507
+---
+
+Welcome to my website!
+
+
