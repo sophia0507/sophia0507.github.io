@@ -7,5 +7,53 @@
   },
   "resume.qmd": {
     "resume.html": "00c55da8"
+  },
+  "projects/projects.qmd": {
+    "projects.html": "9e42d64e"
+  },
+  "projects/project1/index.qmd": {
+    "index.html": "233562c0"
+  },
+  "projects/project2/index.qmd": {
+    "index.html": "8810bed3"
+  },
+  "hw1_questions.qmd": {
+    "hw1_questions.html": "2c1ea6c3"
+  },
+  "projects/project2/hw1_questions.qmd": {
+    "hw1_questions.html": "a221f8dc"
+  },
+  "quarto-env/Lib/site-packages/cffi/recompiler.py": {
+    "recompiler.html": "79d746d3"
+  },
+  "quarto-env/Lib/site-packages/httpcore-1.0.8.dist-info/licenses/LICENSE.md": {
+    "LICENSE.html": "5de8ae3b"
+  },
+  "quarto-env/Lib/site-packages/httpx-0.28.1.dist-info/licenses/LICENSE.md": {
+    "LICENSE.html": "b694c9aa"
+  },
+  "quarto-env/Lib/site-packages/idna-3.10.dist-info/LICENSE.md": {
+    "LICENSE.html": "a8eb294c"
+  },
+  "quarto-env/Lib/site-packages/numpy/random/LICENSE.md": {
+    "LICENSE.html": "ee15eea8"
+  },
+  "quarto-env/Lib/site-packages/pandas/tests/indexes/datetimes/test_indexing.py": {
+    "test_indexing.html": "ab6cf93a"
+  },
+  "quarto-env/Lib/site-packages/pandas/tests/indexes/period/test_constructors.py": {
+    "test_constructors.html": "e44cf86b"
+  },
+  "quarto-env/Lib/site-packages/pandas/tests/indexes/period/test_indexing.py": {
+    "test_indexing.html": "676179cc"
+  },
+  "quarto-env/Lib/site-packages/pyzmq-26.4.0.dist-info/licenses/LICENSE.md": {
+    "LICENSE.html": "a6bff949"
+  },
+  "quarto-env/Lib/site-packages/soupsieve-2.6.dist-info/licenses/LICENSE.md": {
+    "LICENSE.html": "9afd9c21"
+  },
+  "projects/hw1/index.qmd": {
+    "index.html": "ee94ead0"
   }
 }

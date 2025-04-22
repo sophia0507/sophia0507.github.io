@@ -1,0 +1,43 @@
+---
+title: "Analysis of Cars"
+author: Sophia Wang
+date: today
+---
+
+# Header
+
+Let's investigate the relationship between fuel efficiency (`mpg`) and engine displacement (`disp`) from the `mtcars` dataset. Those variables have a correlation of `r cor(mtcars$mpg, mtcars$disp) |> format(digits=2)`.
+
+## Sub-Header
+
+Here is a plot:
+
+---
+title: "Analysis of Cars"
+author: Sophia Wang
+date: today
+---
+
+# Header
+
+Let's investigate the relationship between fuel efficiency (`mpg`) and engine displacement (`disp`) from the `mtcars` dataset. These variables have a negative correlation.
+
+## Sub-Header
+
+Here is a plot:
+
+```{python}
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load dataset
+from pydataset import data
+mtcars = data('mtcars')
+
+# Plot
+sns.set_theme(style="whitegrid")
+sns.scatterplot(data=mtcars, x="mpg", y="disp", color="dodgerblue")
+plt.title("MPG vs Displacement")
+plt.show()
+
