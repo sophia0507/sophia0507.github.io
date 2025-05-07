@@ -1,0 +1,499 @@
+---
+title: "Poisson Regression Examples"
+author: "Ting Yu(Sophia) Wang"
+date: today
+callout-appearance: minimal # this hides the blue "i" icon on .callout-notes
+---
+
+
+## Blueprinty Case Study
+
+### Introduction
+
+Blueprinty is a small firm that makes software for developing blueprints specifically for submitting patent applications to the US patent office. Their marketing team would like to make the claim that patent applicants using Blueprinty's software are more successful in getting their patent applications approved. Ideal data to study such an effect might include the success rate of patent applications before using Blueprinty's software and after using it. Unfortunately, such data is not available. 
+
+However, Blueprinty has collected data on 1,500 mature (non-startup) engineering firms. The data include each firm's number of patents awarded over the last 5 years, regional location, age since incorporation, and whether or not the firm uses Blueprinty's software. The marketing team would like to use this data to make the claim that firms using Blueprinty's software are more successful in getting their patent applications approved.
+
+
+### Data
+
+
+```{python}
+# Import necessary libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from math import factorial
+import scipy.stats
+from scipy.special import gammaln
+import statsmodels.api as sm
+import scipy.optimize as sp
+import scipy.stats as stats
+from scipy.stats import gaussian_kde
+from scipy.optimize import minimize_scalar,minimize, approx_fprime
+```
+```{python}
+df = pd.read_csv("blueprinty.csv")  
+df.head()
+```
+
+
+```{python}
+# Map numeric to label
+df["customer_label"] = df["iscustomer"].map({0: "Non-Customer", 1: "Customer"})
+
+# Create histogram
+ax = sns.histplot(data=df, x="patents", hue="customer_label", multiple="dodge", 
+                  bins=30, palette={"Non-Customer": "orange", "Customer": "skyblue"})
+
+# Add title and axis labels
+plt.title("Histogram of Patents by Customer Status")
+plt.xlabel("Number of Patents")
+plt.ylabel("Count")
+plt.tight_layout()
+plt.show()
+
+# Summary statistics by customer status
+df.groupby("customer_label")["patents"].agg(["mean", "std", "count"]).reset_index()
+
+```
+   The histogram above illustrates the distribution of the number of patents for firms that use Blueprinty’s software (`iscustomer = 1`) and those that do not (`iscustomer = 0`). While both distributions are right-skewed and concentrated around 2 to 5 patents, Blueprinty customers generally appear to have a higher patent count.
+
+   The summary statistics confirm this visual pattern: the mean number of patents for non-customers is **3.47**, whereas for customers it is **4.13**. Additionally, customers exhibit a slightly higher standard deviation (2.55 vs. 2.23), indicating a bit more variability in patent outcomes among users of the software.
+   These results suggest that firms using Blueprinty’s software tend to receive more patents on average than non-customers.
+
+---
+
+Blueprinty customers are not selected at random. It may be important to account for systematic differences in the age and regional location of customers vs non-customers.
+
+
+```{python}
+# Region distribution
+region_ct = pd.crosstab(df["region"], df["customer_label"], normalize="columns") * 100
+region_ct.columns= ["Customer (%)", "Non-Customer (%)"]
+region_ct.index.name = "Region"
+region_ct = region_ct.reset_index()
+print(region_ct.to_string(index=False))
+```
+```{python}
+# Age distribution
+age_summary = df.groupby("customer_label")["age"].agg(["mean", "std", "min", "max"]).round(2)
+age_summary = age_summary.reset_index()
+age_summary.columns = ["Customer Status", "Mean Age", "Std Dev", "Min Age", "Max Age"]
+age_summary
+```
+```{python}
+ages = np.linspace(df["age"].min(), df["age"].max(), 300)
+kde_non = gaussian_kde(df.loc[df["customer_label"]=="Non-Customer","age"])(ages)
+kde_cust = gaussian_kde(df.loc[df["customer_label"]=="Customer","age"])(ages)
+
+plt.plot(ages, kde_non, label="Non-Customer", color="tab:orange")
+plt.plot(ages, kde_cust, label="Customer",    color="tab:blue")
+plt.fill_between(ages, kde_non, alpha=0.3, color="tab:orange")
+plt.fill_between(ages, kde_cust, alpha=0.3, color="tab:blue")
+
+plt.title("Density of Firm Age by Customer Status")
+plt.xlabel("Firm Age")
+plt.ylabel("Density")
+plt.legend(title="Customer Status")
+plt.grid(True)
+plt.show()
+```
+   A review of the regional distribution shows that **Blueprinty customers are not evenly distributed across the United States**. In particular, the **Northeast** region accounts for the majority of customers (68.2%), while only 26.7% of non-customers are located there. In contrast, regions like the **Midwest, South, and Southwest** are relatively underrepresented among customers compared to non-customers. This suggests strong geographic clustering in Blueprinty’s user base, potentially reflecting targeted marketing or regional technology adoption patterns.
+
+   In terms of **firm age**, the average age of customers is slightly **younger** at **26.1 years** (std = 6.95), compared to **26.9 years** (std = 7.81) for non-customers. Although the means are close, the **density plot** further reveals that non-customers have a higher peak in the 24–26 age range and a more pronounced tail toward older firms (ages 35+), while customers are more concentrated around the mid-20s.
+   
+   These observed differences in both **region** and **age** imply that Blueprinty customers may differ systematically from non-customers. Consequently, it’s important to include these covariates in the regression model to avoid attributing differences in patent counts solely to software usage.
+
+
+
+
+
+
+
+### Estimation of Simple Poisson Model
+
+Since our outcome variable of interest can only be small integer values per a set unit of time, we can use a Poisson density to model the number of patents awarded to each engineering firm over the last 5 years. We start by estimating a simple Poisson model via Maximum Likelihood.
+
+We now define the log-likelihood function for the Poisson model::
+
+
+```{python}
+def poisson_loglikelihood(lambda_val, Y):
+    return -lambda_val + Y * np.log(lambda_val) - gammaln(Y + 1)
+
+def poisson_loglikelihood_sum(lambda_val, Y):
+    return np.sum(-lambda_val + Y * np.log(lambda_val) - gammaln(Y + 1))
+```
+Now let's plot the log-likelihood for a range of lambda values:
+
+```{python}
+# Get the observed patents data
+observed_patents = df['patents'].values
+
+# Choose a reasonable range of lambda values based on data
+lambda_range = np.linspace(0.1, 20, 100)
+ll_values = np.zeros(len(lambda_range))
+
+# Calculate log-likelihood for each lambda
+for i, lam in enumerate(lambda_range):
+    ll_values[i] = np.sum([poisson_loglikelihood(lam, y) for y in observed_patents])
+
+# Plot
+plt.figure(figsize=(10, 6))
+plt.plot(lambda_range, ll_values)
+plt.xlabel('Lambda')
+plt.ylabel('Log-Likelihood')
+plt.title('Log-Likelihood of Poisson Model for Different Lambda Values')
+plt.axvline(x=observed_patents.mean(), color='red', linestyle='--', 
+            label=f'Sample Mean (λ_MLE = {observed_patents.mean():.2f})')
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+The maximum likelihood estimate (MLE) for lambda in a Poisson distribution is the sample mean. Mathematically, we can show this by taking the derivative of the log-likelihood function:
+
+$\frac{d}{d\lambda} \ln f(Y|\lambda) = -1 + \frac{Y}{\lambda} = 0$
+
+Solving for lambda:
+$\lambda_{MLE} = Y$
+
+For a sample of observations, the MLE is the sample mean:
+$\lambda_{MLE} = \frac{1}{n}\sum_{i=1}^{n} Y_i = \bar{Y}$
+
+The following optimization step confirms the MLE matches the sample mean:
+
+```{python}
+# Define the negative log-likelihood (for minimization)
+def neg_poisson_loglikelihood_sum(lambda_val, Y):
+    return -poisson_loglikelihood_sum(lambda_val, Y)
+
+# Find the MLE using optimization
+initial_guess = 1.0  # Starting point for optimization
+result = minimize(neg_poisson_loglikelihood_sum, 
+                  x0=[1.0], 
+                  args=(observed_patents,), 
+                  method='L-BFGS-B',
+                  bounds=[(1e-6, None)])
+
+print(f"MLE estimate for lambda: {result.x[0]:.4f}")
+print(f"Sample mean: {observed_patents.mean():.4f}")
+print(f"Are they equal? {np.isclose(result.x[0], observed_patents.mean())}")
+```
+   As shown in the plot and confirmed by optimization, the maximum of the log-likelihood function occurs at λ = 3.6847, which is exactly the sample mean. This aligns with the known analytical result for the MLE of λ in a Poisson model. The red dashed line highlights the MLE and validates our implementation of the likelihood-based estimation approach.
+
+
+
+
+
+
+### Estimation of Poisson Regression Model
+
+Next, we extend our simple Poisson model to a Poisson Regression Model such that $Y_i = \text{Poisson}(\lambda_i)$ where $\lambda_i = \exp(X_i'\beta)$. The interpretation is that the success rate of patent awards is not constant across all firms ($\lambda$) but rather is a function of firm characteristics $X_i$. Specifically, we will use the covariates age, age squared, region, and whether the firm is a customer of Blueprinty.
+
+We begin by defining the log-likelihood function for the Poisson regression model:
+
+```{python}
+def poisson_regression_loglikelihood(beta, Y, X):
+    beta = np.array(beta, dtype=np.float64)
+    Y = np.array(Y, dtype=np.float64)
+    X = np.array(X, dtype=np.float64)
+    linear_pred = np.dot(X, beta)
+    lambda_i = np.exp(np.clip(linear_pred, -30, 30))
+    ll_components = -lambda_i + Y * np.log(lambda_i)
+    return -np.sum(ll_components)
+```
+
+---
+
+#### Data Preparation and Design Matrix
+
+```{python}
+# Add squared age and region dummies
+df["age_squared"] = df["age"] ** 2
+region_dummies = pd.get_dummies(df["region"], prefix="region", drop_first=True)
+
+# Combine into design matrix
+X_data = pd.concat([
+    pd.DataFrame({'intercept': 1}, index=df.index),
+    df[['age', 'age_squared', 'iscustomer']],
+    region_dummies
+], axis=1)
+
+X = X_data.values.astype(np.float64)
+y = df['patents'].values.astype(np.float64)
+```
+
+---
+
+#### Fit Using `statsmodels` GLM and Use as Starting Point
+
+```{python}
+glm_model = sm.GLM(y, X, family=sm.families.Poisson())
+glm_results = glm_model.fit()
+initial_beta = glm_results.params
+```
+
+---
+
+#### Fit Custom MLE Using `scipy.optimize`
+
+```{python}
+
+result_poisson_reg = minimize(
+    poisson_regression_loglikelihood,
+    initial_beta,
+    args=(y, X),
+    method='BFGS',
+    options={'disp': True}
+)
+
+beta_estimates = result_poisson_reg.x
+```
+
+---
+
+#### Compute Standard Errors via Hessian Approximation
+
+```{python}
+def hessian(func, x, epsilon=1e-5):
+    n = len(x)
+    hess = np.zeros((n, n))
+    for i in range(n):
+        for j in range(n):
+            x1, x2, x3, x4 = x.copy(), x.copy(), x.copy(), x.copy()
+            if i == j:
+                x1[i] += epsilon
+                x2[i] -= epsilon
+                hess[i, i] = (func(x1) + func(x2) - 2 * func(x)) / (epsilon ** 2)
+            else:
+                x1[i] += epsilon; x1[j] += epsilon
+                x2[i] += epsilon; x2[j] -= epsilon
+                x3[i] -= epsilon; x3[j] += epsilon
+                x4[i] -= epsilon; x4[j] -= epsilon
+                hess[i, j] = (func(x1) + func(x4) - func(x2) - func(x3)) / (4 * epsilon ** 2)
+                hess[j, i] = hess[i, j]
+    return hess
+
+H = hessian(lambda b: poisson_regression_loglikelihood(b, y, X), beta_estimates)
+cov_matrix = np.linalg.inv(H)
+std_errors = np.sqrt(np.diag(cov_matrix))
+
+z_values = beta_estimates / std_errors
+p_values = 2 * (1 - np.abs(scipy.stats.norm.cdf(z_values)))
+
+custom_results = pd.DataFrame({
+    'Coefficient': beta_estimates,
+    'Std. Error': std_errors,
+    'z-value': z_values,
+    'p-value': p_values
+}, index=X_data.columns)
+
+custom_results.round(4)
+```
+
+---
+
+#### Compare With `statsmodels` Output
+
+```{python}
+sm_results = pd.DataFrame({
+    'Coefficient': glm_results.params,
+    'Std. Error': glm_results.bse,
+    'z-value': glm_results.tvalues,
+    'p-value': glm_results.pvalues
+}, index=X_data.columns)
+
+sm_results.round(4)
+```
+
+The estimates and standard errors obtained using `scipy.optimize` match those from `statsmodels`, confirming the correctness of our custom likelihood implementation.
+
+#### Interpretation of Poisson Regression Results
+
+The model successfully estimated the impact of several firm-level characteristics on patent success. we found:
+
+- **Firm Age**: A positive and significant effect (age coefficient = 0.1486, p < 0.001), with a small negative effect from age squared. This suggests diminishing returns to age: patent counts increase with age but at a decreasing rate.
+- **Region**: None of the region coefficients were statistically significant at the 5% level, indicating little evidence of regional differences in patent activity once other variables are controlled for.
+- **Blueprinty Software (iscustomer)**: The coefficient for `iscustomer` is **0.2076** with a p-value of **< 0.001**, meaning it is both positive and highly statistically significant.
+
+
+---
+
+#### Interpreting the Effect of Blueprinty’s Software
+
+To interpret the effect of the binary variable `iscustomer`, we simulate two scenarios:
+- \(X_0\): all firms are non-customers (iscustomer = 0)
+- \(X_1\): all firms are customers (iscustomer = 1)
+
+we compare the average predicted number of patents under each scenario:
+
+```{python}
+X_0 = X.copy()
+X_1 = X.copy()
+iscustomer_idx = list(X_data.columns).index('iscustomer')
+X_0[:, iscustomer_idx] = 0
+X_1[:, iscustomer_idx] = 1
+
+lambda_0 = np.exp(np.dot(X_0, beta_estimates))
+lambda_1 = np.exp(np.dot(X_1, beta_estimates))
+
+differences = lambda_1 - lambda_0
+avg_effect = np.mean(differences)
+perc_increase = 100 * avg_effect / np.mean(lambda_0)
+
+print("Average predicted increase in patents:", round(avg_effect, 3), "per firm")
+print("Percent increase:", round(perc_increase, 2), "%")
+```
+
+This means that, holding all else constant, firms using Blueprinty's software are predicted to earn about **0.79 more patents** over 5 years, which represents a **23% improvement** compared to non-customers.
+---
+
+#### Visualizing the Effect Distribution
+
+```{python}
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(10, 6))
+plt.hist(differences, bins=30, alpha=0.7)
+plt.axvline(avg_effect, color='red', linestyle='--', 
+            label=f'Avg Effect: {avg_effect:.2f} patents')
+plt.xlabel('Increase in Predicted Patents')
+plt.ylabel('Number of Firms')
+plt.title('Effect of Using Blueprinty Software')
+plt.legend()
+plt.grid(True)
+plt.show()
+```
+
+The histogram shows that nearly all firms are expected to benefit from adopting Blueprinty's software, reinforcing the interpretation that the product positively contributes to patenting success.
+
+This result supports the company's marketing claim, though causal inference would require further analysis beyond this observational model.
+
+
+
+
+
+
+
+
+
+
+## AirBnB Case Study
+
+### Introduction
+
+AirBnB is a popular platform for booking short-term rentals. In March 2017, students Annika Awad, Evan Lebo, and Anna Linden scraped of 40,000 Airbnb listings from New York City.  The data include the following variables:
+
+:::: {.callout-note collapse="true"}
+### Variable Definitions
+
+    - `id` = unique ID number for each unit
+    - `last_scraped` = date when information scraped
+    - `host_since` = date when host first listed the unit on Airbnb
+    - `days` = `last_scraped` - `host_since` = number of days the unit has been listed
+    - `room_type` = Entire home/apt., Private room, or Shared room
+    - `bathrooms` = number of bathrooms
+    - `bedrooms` = number of bedrooms
+    - `price` = price per night (dollars)
+    - `number_of_reviews` = number of reviews for the unit on Airbnb
+    - `review_scores_cleanliness` = a cleanliness score from reviews (1-10)
+    - `review_scores_location` = a "quality of location" score from reviews (1-10)
+    - `review_scores_value` = a "quality of value" score from reviews (1-10)
+    - `instant_bookable` = "t" if instantly bookable, "f" if not
+
+::::
+
+
+### Data Analysis
+
+```{python}
+# Load the AirBnB data
+airbnb_df = pd.read_csv('airbnb.csv',index_col=0)
+
+# Display the first few rows
+airbnb_df.head()
+```
+
+```{python}
+# Check the data structure and missing values
+airbnb_df.info()
+```
+
+```{python}
+# Summary statistics
+airbnb_df.describe()
+```
+
+
+### Data Cleaning and Feature Engineering
+```{python}
+
+# Select relevant columns
+model_cols = ['room_type', 'bathrooms',
+    'bedrooms','price' ,'number_of_reviews',  
+    'review_scores_cleanliness', 'review_scores_location',
+    'review_scores_value', 'instant_bookable', 
+]
+
+# Drop missing values
+airbnb_clean = airbnb_df[model_cols].dropna()
+
+# Convert categorical variables into dummy variables
+airbnb_clean = pd.get_dummies(airbnb_clean, columns=["room_type", "instant_bookable"], drop_first=True)
+
+airbnb_clean.head()
+
+```
+
+
+---
+
+### Fit Poisson Regression Model
+
+```{python}
+# Define target and features
+y = airbnb_clean["number_of_reviews"]
+X = airbnb_clean.drop(columns=["number_of_reviews"])
+X = sm.add_constant(X)  # Add intercept
+
+X = X.astype(float)
+y = y.astype(float)
+
+# Fit Poisson regression
+model = sm.GLM(y, X, family=sm.families.Poisson())
+results = model.fit()
+
+results.summary()
+```
+
+---
+
+### Interpretation of Results
+
+```{python}
+results_table = pd.DataFrame({
+    "Coefficient": results.params,
+    "Std. Error": results.bse,
+    "z-value": results.tvalues,
+    "p-value": results.pvalues
+})
+results_table.round(4)
+```
+### Interpretation of Poisson Regression Results
+
+The number of reviews (used as a proxy for bookings) varies significantly across listing features:
+
+- **Bedrooms (+)**: Listings with more bedrooms receive more reviews, likely due to larger group bookings.
+- **Bathrooms (-)**: Surprisingly, more bathrooms are associated with fewer reviews, possibly due to lower turnover (longer stays).
+- **Price (n.s.)**: The price effect is small and not statistically significant.
+- **Review Scores**:
+  - **Cleanliness (+)**: Strong positive effect—cleaner listings attract more reviews.
+  - **Location & Value (-)**: Both are negatively associated with review counts, possibly due to selection or expectation effects.
+- **Room Type**:
+  - **Private room (-)** and **Shared room (−−)**: Receive fewer reviews than entire homes.
+- **Instant Bookable (+)**: Listings that allow instant booking get significantly more reviews, likely due to ease of reservation.
+
+These results suggest that amenities, guest experience, and booking convenience all influence booking volume on Airbnb.

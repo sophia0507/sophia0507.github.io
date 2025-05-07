@@ -16,7 +16,8 @@ website:
             text: Project 1
           - href: projects/hw1/index.qmd
             text: HW1
-
+          - href: projects/hw2/index.qmd
+            text: HW2
 format:
   html:
     theme:

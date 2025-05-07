@@ -55,5 +55,14 @@
   },
   "projects/hw1/index.qmd": {
     "index.html": "ee94ead0"
+  },
+  "projects/hw2/hw2_questions.qmd": {
+    "hw2_questions.html": "c6d4b5d7"
+  },
+  "quarto-env/Lib/site-packages/seaborn-0.13.2.dist-info/LICENSE.md": {
+    "LICENSE.html": "275ae266"
+  },
+  "projects/hw2/index.qmd": {
+    "index.html": "f27e9765"
   }
 }
