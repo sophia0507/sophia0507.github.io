@@ -18,6 +18,8 @@ website:
             text: HW1
           - href: projects/hw2/index.qmd
             text: HW2
+          - href: projects/hw3/index.qmd
+            text: HW3            
 format:
   html:
     theme:
