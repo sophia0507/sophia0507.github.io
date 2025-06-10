@@ -1,0 +1,146 @@
+---
+title: "K Nearest Neighbors Classification"
+author: "Sophia Wang"
+date: today
+---
+
+## Introduction
+
+In this section, I explore the **K-Nearest Neighbors (KNN)** algorithm, a simple yet effective supervised learning method used for classification tasks. KNN is a **non-parametric** method that makes predictions based on the majority class of the nearest data points in the feature space.
+
+To illustrate the workings of KNN, I generate a **synthetic dataset** with two features (`x1` and `x2`) and a **binary target variable** (`y`). The class boundary is designed to be **non-linear and wiggly**, defined by a sine function, making it a useful benchmark for testing the behavior of KNN under non-linear decision boundaries.
+
+I then implement the KNN algorithm **from scratch**, and compare its predictions with those of `scikit-learn`’s built-in `KNeighborsClassifier`. Finally, I evaluate model accuracy on a test dataset for values of **\( k = 1 \) to \( k = 30 \)**, and determine the **optimal number of neighbors** by plotting test set performance.
+
+Throughout this exercise, the focus is on:
+
+- Understanding the behavior of KNN with respect to the choice of \( k \)
+
+- Gaining experience with both manual and library-based implementations
+
+- Evaluating the model’s generalization using synthetic test data
+
+
+
+## Dataset Generation
+
+I begin by generating a synthetic dataset using two features `x1` and `x2`, and a binary outcome `y`. The boundary between the classes is defined by a sine function of `x1`.
+
+```{python}
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+
+np.random.seed(42)
+n = 100
+x1 = np.random.uniform(-3, 3, n)
+x2 = np.random.uniform(-3, 3, n)
+boundary = np.sin(4 * x1) + x1
+y = np.where(x2 > boundary, 1, 0).astype(str)
+y = pd.Categorical(y)
+
+data = pd.DataFrame({'x1': x1, 'x2': x2, 'y': y})
+data.head()
+```
+
+## Visualization of Training Data
+```{python}
+colors = {'0': 'blue', '1': 'red'}
+plt.figure(figsize=(8,6))
+plt.scatter(data['x1'], data['x2'], c=[colors[i] for i in data['y']], label='Training Data')
+x_vals = np.linspace(-3, 3, 300)
+plt.plot(x_vals, np.sin(4 * x_vals) + x_vals, color='black', linestyle='--', label='True Boundary')
+plt.xlabel('x1')
+plt.ylabel('x2')
+plt.title('Training Data with Decision Boundary')
+plt.legend()
+plt.grid(True)
+plt.show()
+```
+
+## Test Dataset Generation
+```{python}
+np.random.seed(99)
+x1_test = np.random.uniform(-3, 3, n)
+x2_test = np.random.uniform(-3, 3, n)
+boundary_test = np.sin(4 * x1_test) + x1_test
+y_test = np.where(x2_test > boundary_test, 1, 0).astype(str)
+y_test = pd.Categorical(y_test)
+
+test_data = pd.DataFrame({'x1': x1_test, 'x2': x2_test, 'y': y_test})
+```
+
+## Manual KNN Implementation
+```{python}
+from collections import Counter
+
+def euclidean(p1, p2):
+    return np.sqrt(np.sum((p1 - p2)**2))
+
+def knn_predict(X_train, y_train, X_test, k):
+    predictions = []
+    for test_point in X_test:
+        distances = [euclidean(test_point, train_point) for train_point in X_train]
+        k_indices = np.argsort(distances)[:k]
+        k_labels = y_train[k_indices]
+        majority = Counter(k_labels).most_common(1)[0][0]
+        predictions.append(majority)
+    return np.array(predictions)
+```
+
+## Evaluation and Comparison with scikit-learn
+
+```{python}
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+
+X_train = data[['x1', 'x2']].values
+y_train = data['y'].astype(str).values
+X_test = test_data[['x1', 'x2']].values
+y_true = test_data['y'].astype(str).values
+
+accuracies_manual = []
+accuracies_sklearn = []
+
+for k in range(1, 31):
+    y_pred_manual = knn_predict(X_train, y_train, X_test, k)
+    acc_manual = accuracy_score(y_true, y_pred_manual)
+    accuracies_manual.append(acc_manual)
+
+    clf = KNeighborsClassifier(n_neighbors=k)
+    clf.fit(X_train, y_train)
+    acc_sklearn = clf.score(X_test, y_true)
+    accuracies_sklearn.append(acc_sklearn)
+```
+
+## Accuracy Plot
+```{python}
+plt.figure(figsize=(10,6))
+plt.plot(range(1, 31), np.array(accuracies_manual)*100, label='Manual KNN', marker='o')
+plt.plot(range(1, 31), np.array(accuracies_sklearn)*100, label='Sklearn KNN', marker='x')
+plt.xlabel('k')
+plt.ylabel('Accuracy (%)')
+plt.title('KNN Accuracy on Test Set for k=1 to 30')
+plt.legend()
+plt.grid(True)
+plt.show()
+```
+
+
+
+### Interpretation
+
+- **Overall Accuracy Trend:**  
+  Both implementations show high accuracy for small \( k \), with performance gradually decreasing as \( k \) increases.
+
+- **Manual vs. Sklearn:**  
+  The manual KNN tends to slightly outperform `scikit-learn`'s implementation for most values of \( k \), possibly due to tie-breaking differences.
+
+- **Stability:**  
+  The accuracy of manual KNN remains around 90–92% for \( k \leq 15 \), showing stable performance before declining more consistently.
+
+## Conclusion
+From the plot of test accuracies, the highest accuracy achieved was 92%, occurring at multiple values including k=1, 2, 4, 6, 13 and 16. While k=1 yields the best performance, it is prone to overfitting since it depends entirely on the nearest point. The manual implementation consistently performs marginally better than the scikit-learn version, likely due to subtle differences in tie-breaking or distance calculations. Overall, selecting a small odd k, such as 4 or 6, provides a balanced approach that maintains high accuracy while enhancing model robustness.
+
+

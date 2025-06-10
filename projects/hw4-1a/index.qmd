@@ -1,0 +1,164 @@
+---
+title: "1a. K-Means"
+author: "Sophia Wang"
+date: today
+---
+
+## Introduction
+
+In this section, I implement the K-Means clustering algorithm from scratch in Python, visualize its iterative process, and compare the results with those from scikit-learn’s built-in implementation. The analysis is based on the Palmer Penguins dataset, using the `bill_length_mm` and `flipper_length_mm features`.
+
+
+
+## Dataset Preparation
+
+```{python}
+#| label: load-data
+import pandas as pd
+import numpy as np
+
+# Load dataset
+penguins = pd.read_csv("palmer_penguins.csv")
+# Select features and drop missing values
+penguins = penguins[['bill_length_mm', 'flipper_length_mm']].dropna()
+X = penguins.values
+
+# Quick summary
+print(penguins.describe())
+```
+
+## Custom K-Means Implementation
+Define core functions:
+- euclidean_distance: compute distance between points
+
+- initialize_centroids: random selection of initial centroids
+
+- assign_clusters: assign each point to nearest centroid
+
+- update_centroids: recompute centroids
+
+```{python}
+#| label: custom-kmeans
+def euclidean_distance(a, b):
+    return np.linalg.norm(a - b, axis=1)
+
+def initialize_centroids(X, k):
+    idx = np.random.choice(X.shape[0], k, replace=False)
+    return X[idx]
+
+def assign_clusters(X, centroids):
+    return np.array([np.argmin(euclidean_distance(x, centroids)) for x in X])
+
+def update_centroids(X, labels, k):
+    return np.array([X[labels == i].mean(axis=0) for i in range(k)])
+
+def kmeans_custom(X, k, max_iters=100):
+    centroids = initialize_centroids(X, k)
+    for _ in range(max_iters):
+        labels = assign_clusters(X, centroids)
+        new_centroids = update_centroids(X, labels, k)
+        if np.allclose(centroids, new_centroids):
+            break
+        centroids = new_centroids
+    return centroids, labels
+```
+
+## Visualization of Algorithm Steps
+I animate the movement of centroids across iterations for K=3 and save the result as `kmeans_steps.gif`.
+```{python}
+#| label: animate-kmeans
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+
+K = 3
+centroids, labels = kmeans_custom(X, K)
+
+fig, ax = plt.subplots()
+scatter = ax.scatter(X[:,0], X[:,1], c=labels, cmap='viridis', s=50)
+cent_plot = ax.scatter(centroids[:,0], centroids[:,1], c='red', marker='X', s=100)
+ax.set_xlabel('Bill Length (mm)')
+ax.set_ylabel('Flipper Length (mm)')
+ax.set_title('K-Means Iterations (K=3)')
+
+def update(frame):
+    global centroids, labels
+    labels = assign_clusters(X, centroids)
+    centroids = update_centroids(X, labels, K)
+    scatter.set_array(labels)
+    cent_plot.set_offsets(centroids)
+    return scatter, cent_plot
+
+anim = FuncAnimation(fig, update, frames=10, interval=500, blit=True)
+anim.save('kmeans_steps.gif', writer='pillow')
+```
+
+## Metric Comparison
+
+To evaluate clustering quality, both the Within-Cluster Sum of Squares (WSS) and the Silhouette Score are computed for values of 
+K ranging from 2 to 7.
+
+```{python}
+#| label: metrics-comparison
+def compute_wss(X, labels, centroids):
+    total = 0.0
+    for i in range(centroids.shape[0]):
+        cluster_pts = X[labels == i]
+        total += np.sum((cluster_pts - centroids[i]) ** 2)
+    return total
+
+def silhouette_score_custom(X, labels):
+    n = X.shape[0]
+    unique_labels = np.unique(labels)
+    sil_vals = np.zeros(n)
+    for i in range(n):
+        own = labels[i]
+        same = X[labels == own]
+        # a_i: mean distance to points in same cluster
+        a = np.mean(np.linalg.norm(same - X[i], axis=1))
+        # b_i: min mean distance to points in other clusters
+        b = np.min([
+            np.mean(np.linalg.norm(X[labels == other] - X[i], axis=1))
+            for other in unique_labels if other != own
+        ])
+        sil_vals[i] = (b - a) / max(a, b)
+    return np.mean(sil_vals)
+
+wss_list = []
+sil_list = []
+Ks = range(2, 8)
+
+for k in Ks:
+
+    centroids, labels = kmeans_custom(X, k)
+    wss_list.append(compute_wss(X, labels, centroids))
+    sil_list.append(silhouette_score_custom(X, labels))
+
+
+import matplotlib.pyplot as plt
+fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+
+axes[0].plot(Ks, wss_list, marker='o')
+axes[0].set_title('WSS vs K')
+axes[0].set_xlabel('Number of Clusters')
+axes[0].set_ylabel('WSS')
+
+axes[1].plot(Ks, sil_list, marker='o')
+axes[1].set_title('Silhouette Score vs K')
+axes[1].set_xlabel('Number of Clusters')
+axes[1].set_ylabel('Silhouette Score')
+
+plt.tight_layout()
+plt.show()
+```
+
+## Interpretation
+- WSS (Within-Cluster Sum of Squares):
+A sharp decrease in WSS is observed from K = 2 to K = 3, followed by a more gradual decline for larger K values. This creates a noticeable "elbow" at K = 3, which typically suggests an optimal number of clusters—beyond which additional clusters contribute little to reducing within-group variance.
+
+- Silhouette Score:
+The highest silhouette score appears at K = 2, indicating the strongest separation between clusters. However, the score remains relatively stable from K = 3 to K = 5, with only a slight drop at K = 3, suggesting that cluster cohesion and separation are still well maintained.
+
+## Conclusion
+Although K = 2 has the highest silhouette score, the WSS plot strongly supports K = 3 as the elbow point.  Considering both metrics, K = 3 provides a solid compromise between model simplicity and clustering quality, making it a well-balanced choice for this dataset.
+
+

@@ -19,7 +19,11 @@ website:
           - href: projects/hw2/index.qmd
             text: HW2
           - href: projects/hw3/index.qmd
-            text: HW3            
+            text: HW3
+          - href: projects/hw4-1a/index.qmd
+            text: HW4-1a
+          - href: projects/hw4-a/index.qmd
+            text: HW4-2a                           
 format:
   html:
     theme:
