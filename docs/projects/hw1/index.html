@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Ting Yu(Sophia) Wang">
-<meta name="dcterms.date" content="2025-04-21">
+<meta name="dcterms.date" content="2025-06-10">
 
 <title>A Replication of Karlan and List (2007) – Sophia’s Website</title>
 <style>
@@ -138,12 +138,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-projects">    
         <li>
-    <a class="dropdown-item" href="../../projects/project1/index.html">
- <span class="dropdown-text">Project 1</span></a>
-  </li>  
-        <li>
     <a class="dropdown-item" href="../../projects/hw1/index.html">
  <span class="dropdown-text">HW1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../projects/hw2/index.html">
+ <span class="dropdown-text">HW2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../projects/hw3/index.html">
+ <span class="dropdown-text">HW3</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../projects/hw4-1a/index.html">
+ <span class="dropdown-text">HW4-1a</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../projects/hw4-2a/index.html">
+ <span class="dropdown-text">HW4-2a</span></a>
   </li>  
     </ul>
   </li>
@@ -205,7 +217,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">April 21, 2025</p>
+      <p class="date">June 10, 2025</p>
     </div>
   </div>
   
@@ -226,7 +238,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="data">Data</h2>
 <section id="description" class="level3">
 <h3 class="anchored" data-anchor-id="description">Description</h3>
-<div id="31572da5" class="cell" data-execution_count="1">
+<div id="b876415b" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"karlan_list_2007.dta"</span>)</span>
@@ -616,7 +628,7 @@ Variable Definitions
 <section id="balance-test" class="level3">
 <h3 class="anchored" data-anchor-id="balance-test">Balance Test</h3>
 <p>As an ad hoc test of the randomization mechanism, I provide a series of tests that compare aspects of the treatment and control groups to assess whether they are statistically significantly different from one another.</p>
-<div id="b35fa805" class="cell" data-execution_count="2">
+<div id="5a04b219" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
@@ -657,7 +669,7 @@ treatment      0.0137      0.115      0.119      0.905      -0.211       0.238
 <p>First, I analyze whether matched donations lead to an increased response rate of making a donation.</p>
 <section id="barplot-proportion-donated-by-group" class="level4">
 <h4 class="anchored" data-anchor-id="barplot-proportion-donated-by-group">1. Barplot: Proportion Donated by Group</h4>
-<div id="b0186914" class="cell" data-execution_count="3">
+<div id="39c9d397" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"karlan_list_2007.dta"</span>)</span>
@@ -694,7 +706,7 @@ treatment      0.0137      0.115      0.119      0.905      -0.211       0.238
 </section>
 <section id="t-test-and-bivariate-linear-regression" class="level4">
 <h4 class="anchored" data-anchor-id="t-test-and-bivariate-linear-regression">2. T-test and Bivariate Linear Regression</h4>
-<div id="0e42ebce" class="cell" data-execution_count="4">
+<div id="058db179" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"karlan_list_2007.dta"</span>)</span>
@@ -730,7 +742,7 @@ treatment      0.0042      0.001      3.101      0.002       0.002       0.007
 </section>
 <section id="probit-regression" class="level4">
 <h4 class="anchored" data-anchor-id="probit-regression">3. Probit Regression</h4>
-<div id="9b438837" class="cell" data-execution_count="5">
+<div id="5c2973e9" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># probit regression</span></span>
@@ -755,7 +767,7 @@ treatment      0.0868      0.028      3.113      0.002       0.032       0.141
 <p>Next, I assess the effectiveness of different sizes of matched donations on the response rate.</p>
 <section id="create-ratio1-dummy-and-summary-of-donation-rates" class="level4">
 <h4 class="anchored" data-anchor-id="create-ratio1-dummy-and-summary-of-donation-rates">1. Create <code>ratio1</code> Dummy and Summary of Donation Rates</h4>
-<div id="23baed0b" class="cell" data-execution_count="6">
+<div id="280d3185" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"karlan_list_2007.dta"</span>)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -779,7 +791,7 @@ treatment      0.0868      0.028      3.113      0.002       0.032       0.141
 </section>
 <section id="t-tests-compare-donation-rates-between-match-ratios" class="level4">
 <h4 class="anchored" data-anchor-id="t-tests-compare-donation-rates-between-match-ratios">2. T-Tests: Compare Donation Rates Between Match Ratios</h4>
-<div id="5d866895" class="cell" data-execution_count="7">
+<div id="4663f66b" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_stata(<span class="st">"karlan_list_2007.dta"</span>)</span>
@@ -813,7 +825,7 @@ t-statistic = -0.0501, p-value = 0.9600</code></pre>
 </section>
 <section id="regression-donation-match-ratio-group-ols" class="level4">
 <h4 class="anchored" data-anchor-id="regression-donation-match-ratio-group-ols">3. Regression: Donation ~ Match Ratio Group (OLS)</h4>
-<div id="411dcfb5" class="cell" data-execution_count="8">
+<div id="8f23ed65" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.formula.api <span class="im">as</span> smf</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>reg_match <span class="op">=</span> smf.ols(<span class="st">"gave ~ ratio1 + ratio2 + ratio3"</span>, data<span class="op">=</span>df).fit()</span>
@@ -836,7 +848,7 @@ ratio3         0.0049      0.002      2.802      0.005       0.001       0.008
 </section>
 <section id="direct-comparison-of-response-rates" class="level4">
 <h4 class="anchored" data-anchor-id="direct-comparison-of-response-rates">4. Direct Comparison of Response Rates</h4>
-<div id="94ab7d50" class="cell" data-execution_count="9">
+<div id="2d7a62a7" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>prop_ratio1 <span class="op">=</span> gave_ratio1.mean()</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>prop_ratio2 <span class="op">=</span> gave_ratio2.mean()</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>prop_ratio3 <span class="op">=</span> gave_ratio3.mean()</span>
@@ -865,7 +877,7 @@ ratio3         0.0049      0.002      2.802      0.005       0.001       0.008
 <p>In this subsection, I analyze the effect of the size of matched donation on the size of the charitable contribution.</p>
 <section id="regression-on-full-sample" class="level4">
 <h4 class="anchored" data-anchor-id="regression-on-full-sample">1. Regression on Full Sample</h4>
-<div id="f2df741c" class="cell" data-execution_count="10">
+<div id="db009fc2" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>reg_amount <span class="op">=</span> smf.ols(<span class="st">"amount ~ treatment"</span>, data<span class="op">=</span>df).fit()</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Regression of Donation Amount on Treatment (Full Sample):"</span>)</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(reg_amount.summary().tables[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -884,7 +896,7 @@ treatment      0.1536      0.083      1.861      0.063      -0.008       0.315
 </section>
 <section id="regression-among-donors-only" class="level4">
 <h4 class="anchored" data-anchor-id="regression-among-donors-only">2. Regression Among Donors Only</h4>
-<div id="da4ffcc4" class="cell" data-execution_count="11">
+<div id="281401ea" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>df_donors <span class="op">=</span> df[df[<span class="st">"amount"</span>] <span class="op">&gt;</span> <span class="dv">0</span>]</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>reg_amount_donors <span class="op">=</span> smf.ols(<span class="st">"amount ~ treatment"</span>, data<span class="op">=</span>df_donors).fit()</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Regression of Donation Amount on Treatment (Donors Only):"</span>)</span>
@@ -904,7 +916,7 @@ treatment     -1.6684      2.872     -0.581      0.561      -7.305       3.968
 </section>
 <section id="histograms-of-donation-amounts-donors-only" class="level4">
 <h4 class="anchored" data-anchor-id="histograms-of-donation-amounts-donors-only">3. Histograms of Donation Amounts (Donors Only)</h4>
-<div id="9f768d10" class="cell" data-execution_count="12">
+<div id="4839e8ae" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>donations_treatment <span class="op">=</span> df_donors.loc[df_donors[<span class="st">"treatment"</span>] <span class="op">==</span> <span class="dv">1</span>, <span class="st">"amount"</span>]</span>
@@ -960,7 +972,7 @@ treatment     -1.6684      2.872     -0.581      0.561      -7.305       3.968
 <p>Further suppose that the true distribution of respondents who do get a charitable donation match of any size is Bernoulli with probability p=0.022 that a donation is made.</p>
 <section id="law-of-large-numbers" class="level3">
 <h3 class="anchored" data-anchor-id="law-of-large-numbers">Law of Large Numbers</h3>
-<div id="d9b049e0" class="cell" data-execution_count="13">
+<div id="7e2e6953" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1000,7 +1012,7 @@ treatment     -1.6684      2.872     -0.581      0.561      -7.305       3.968
 </section>
 <section id="central-limit-theorem" class="level3">
 <h3 class="anchored" data-anchor-id="central-limit-theorem">Central Limit Theorem</h3>
-<div id="f69a4c89" class="cell" data-execution_count="14">
+<div id="6675dbd3" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
