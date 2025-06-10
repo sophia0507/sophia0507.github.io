@@ -12,17 +12,15 @@ website:
         text: Resume
       - text: Projects
         menu:
-          - href: projects/project1/index.qmd
-            text: Project 1
           - href: projects/hw1/index.qmd
             text: HW1
           - href: projects/hw2/index.qmd
             text: HW2
           - href: projects/hw3/index.qmd
             text: HW3
-          - href: projects\hw4-1a\index.qmd
+          - href: projects/hw4-1a/index.qmd
             text: HW4-1a
-          - href: projects\hw4-2a\index.qmd
+          - href: projects/hw4-2a/index.qmd
             text: HW4-2a                           
 format:
   html:
